@@ -1,2 +1,2 @@
-include cbpi4-LevelSensorDependentActor/config.yaml
-recursive-include cbpi4-LevelSensorDependentActor/static *
+include cbpi4-LevelSensorPumpActor/config.yaml
+recursive-include cbpi4-LevelSensorPumpActor/static *

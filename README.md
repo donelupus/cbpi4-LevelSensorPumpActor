@@ -14,8 +14,8 @@
 - Installation:
 	- log in via ssh 
 	- clone from the GIT repo
-	- sudo pip install ./cbpi4-LevelSensorDependentActor
-	- cbpi add cbpi4-LevelSensorDependentActor
+	- sudo pip install ./cbpi4-LevelSensorPumpActor
+	- cbpi add cbpi4-LevelSensorPumpActor
 	
 - Changelog:
 	- 04.09.21: Initial commit
