@@ -19,6 +19,9 @@ class Logger():
         self.cbpi=cbpi
         self.logger = logging.getLogger(__name__)
 
+    def set_notification(self, notification):
+        self.notification = notification
+
     def debug(self, message):
         self.logger.debug(f"LevelSensorPumpActor - {message}")
 
@@ -56,6 +59,9 @@ class LevelSensorPumpActor(CBPiActor):
         This method defines initial variables for the actor instance.
         '''
         self.logger.debug("On_start method called")
+
+        self.notification = self.props.get("notification", "Yes")
+        self.logger.set_notification(self.notification)
 
         config_path = os.path.join(os.path.dirname(__file__), "config.ini")
         config_path = os.path.abspath(config_path)
