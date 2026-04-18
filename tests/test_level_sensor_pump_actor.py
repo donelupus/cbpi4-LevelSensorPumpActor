@@ -1,14 +1,12 @@
 import pytest
 import importlib
 import types
-from unittest.mock import patch, call, MagicMock, Mock, AsyncMock
+from unittest.mock import MagicMock, Mock, AsyncMock
 import logging
 import sys
-from configparser import ConfigParser
 import asyncio
 import os
 
-config = ConfigParser()
 
 logger = logging.getLogger(__name__)
 
@@ -85,26 +83,15 @@ def level_sensor_pump():
     mock_cbpi.actor.actor_update = AsyncMock(return_value="ok")
 
     props = {
-        "notification": "No"
+        "notification": "No",
+        "gpio_pump": 8,
+        "gpio_level_upper": 12,
+        "gpio_level_lower": 16
     }
 
     level_sensor_pump_actor = LevelSensorPumpActor.LevelSensorPumpActor(mock_cbpi, "ID", props)
 
-    config_path = os.path.join(
-            os.path.dirname(__file__),
-            "..",
-            "cbpi4-LevelSensorPumpActor",
-            "config.ini"
-        )
-    config_path = os.path.abspath(config_path)
-
-    config.read(config_path)
-
-    config.gpio_pump = int(config.get('main', "gpio_pump"))
-    config.gpio_level_upper = int(config.get('main', "gpio_level_upper"))
-    config.gpio_level_lower = int(config.get('main', "gpio_level_lower"))
-
-    yield level_sensor_pump_actor, fake_gpio, config
+    yield level_sensor_pump_actor, fake_gpio
 
 @pytest.mark.asyncio
 async def test_actor_initialization(level_sensor_pump):
@@ -112,7 +99,7 @@ async def test_actor_initialization(level_sensor_pump):
     print("Testing LevelSensorPumpActor initialization...")
 
     ####  Arrange  ####
-    actor, fake_gpio, config = level_sensor_pump
+    actor, fake_gpio = level_sensor_pump
 
     ######  Act  ######
     try:
@@ -127,7 +114,7 @@ async def test_run_iteration_switches_pump_on_and_off(level_sensor_pump):
     """Test the run_iteration method switches the pump output correctly."""
 
     ####  Arrange  ####
-    actor, fake_gpio, config = level_sensor_pump
+    actor, fake_gpio = level_sensor_pump
     await actor.on_start()
 
     ######  Act when empty ######

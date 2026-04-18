@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
 import asyncio
-from configparser import ConfigParser
 from cbpi.api import *
 import RPi.GPIO as GPIO
-import os
 from cbpi.api.dataclasses import NotificationType
 
-
-config = ConfigParser()
 
 mode = GPIO.getmode()
 if mode == None:
@@ -40,7 +36,11 @@ class Logger():
         if self.notification == "Yes":
             self.cbpi.notify("LevelSensorPumpActor", message, NotificationType.ERROR)
 
-@parameters([Property.Select(label="notification", options=["Yes", "No"], description="Will show notification when GPIO switches actor off")])
+@parameters([Property.Select(label="notification", options=["Yes", "No"], description="Will show notification when GPIO switches actor off"),
+             Property.Number(label="gpio_pump", description="The GPIO pin for the pump (BCM numbering)"),
+             Property.Number(label="gpio_level_upper", description="The GPIO pin for the upper level sensor (BCM numbering)"),
+             Property.Number(label="gpio_level_lower", description="The GPIO pin for the lower level sensor (BCM numbering)")])
+
 
 class LevelSensorPumpActor(CBPiActor):
 
@@ -49,10 +49,6 @@ class LevelSensorPumpActor(CBPiActor):
         self.logger = Logger(cbpi)
         self.logger.debug("Init called")
 
-    def read_config(self, parameter):
-        value = config.get('main', parameter)
-        self.logger.debug(f"Variable {parameter}: {value}")
-        return value
     
     async def on_start(self):
         '''
@@ -63,12 +59,9 @@ class LevelSensorPumpActor(CBPiActor):
         self.notification = self.props.get("notification", "Yes")
         self.logger.set_notification(self.notification)
 
-        config_path = os.path.join(os.path.dirname(__file__), "config.ini")
-        config_path = os.path.abspath(config_path)
-        config.read(config_path)
-        self.gpio_pump = int(self.read_config("gpio_pump"))
-        self.gpio_level_upper = int(self.read_config("gpio_level_upper"))
-        self.gpio_level_lower = int(self.read_config("gpio_level_lower"))
+        self.gpio_pump = self.props.get("gpio_pump", 8)
+        self.gpio_level_upper = self.props.get("gpio_level_upper", 9)
+        self.gpio_level_lower = self.props.get("gpio_level_lower", 19)
 
         GPIO.setup(self.gpio_pump, GPIO.OUT)
         GPIO.output(self.gpio_pump, GPIO.LOW)
