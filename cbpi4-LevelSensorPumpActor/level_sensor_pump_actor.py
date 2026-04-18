@@ -101,7 +101,7 @@ class LevelSensorPumpActor(CBPiActor):
         This asyncio coroutine defines what needs to be done to switch the actor off.
         '''
         self.logger.info(f"ACTOR {self.id} OFF")
-        GPIO.output(int(self.gpio_control), GPIO.LOW)
+        GPIO.output(int(self.gpio_pump), GPIO.LOW)
         self.state = False
 
     async def run(self):
