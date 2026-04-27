@@ -37,6 +37,7 @@ class Logger():
             self.cbpi.notify("LevelSensorPumpActor", message, NotificationType.ERROR)
 
 @parameters([Property.Select(label="notification", options=["Yes", "No"], description="Will show notification when GPIO switches actor off"),
+             Property.Select(label="logic", options=["Vorlaufgeföß", "Läuterbottich"], description="Vorlaufgefäß: Pump is on when both sensors are high. Läuterbottich: Pump is on when both sensors are low"),
              Property.Number(label="gpio_pump", description="The GPIO pin for the pump (BCM numbering)"),
              Property.Number(label="gpio_level_upper", description="The GPIO pin for the upper level sensor (BCM numbering)"),
              Property.Number(label="gpio_level_lower", description="The GPIO pin for the lower level sensor (BCM numbering)")])
@@ -58,6 +59,8 @@ class LevelSensorPumpActor(CBPiActor):
 
         self.notification = self.props.get("notification", "Yes")
         self.logger.set_notification(self.notification)
+
+        self.logic = self.props.get("logic", "Vorlaufgeföß")
 
         self.gpio_pump = self.props.get("gpio_pump", 8)
         self.gpio_level_upper = self.props.get("gpio_level_upper", 9)
@@ -114,10 +117,20 @@ class LevelSensorPumpActor(CBPiActor):
         level_lower=GPIO.input(int(self.gpio_level_lower))
         self.logger.debug(f"Run iteration: level_upper: {level_upper} and level_lower: {level_lower}")
 
+
+
         if level_upper and level_lower:
-            self.logger.debug("Both sensors are high, switch pump on.")
-            GPIO.output(int(self.gpio_pump), GPIO.HIGH)
+            if self.logic == "Vorlaufgeföß":
+                self.logger.debug("Both sensors are high, switch pump on.")
+                GPIO.output(int(self.gpio_pump), GPIO.HIGH)
+            elif self.logic == "Läuterbottich":
+                self.logger.debug("Both sensors are high, switch pump off.")
+                GPIO.output(int(self.gpio_pump), GPIO.LOW)
 
         elif not level_upper and not level_lower:
-            self.logger.debug("Both sensors are low, switch pump off.")
-            GPIO.output(int(self.gpio_pump), GPIO.LOW)
+            if self.logic == "Vorlaufgeföß":
+                self.logger.debug("Both sensors are low, switch pump off.")
+                GPIO.output(int(self.gpio_pump), GPIO.LOW)
+            elif self.logic == "Läuterbottich":
+                self.logger.debug("Both sensors are low, switch pump on.")
+                GPIO.output(int(self.gpio_pump), GPIO.HIGH)
