@@ -62,9 +62,9 @@ class LevelSensorPumpActor(CBPiActor):
 
         self.logic = self.props.get("logic", "Vorlaufgefaess")
 
-        self.gpio_pump = self.props.get("gpio_pump", 8)
-        self.gpio_level_upper = self.props.get("gpio_level_upper", 9)
-        self.gpio_level_lower = self.props.get("gpio_level_lower", 19)
+        self.gpio_pump = int(self.props.get("gpio_pump", 8))
+        self.gpio_level_upper = int(self.props.get("gpio_level_upper", 9))
+        self.gpio_level_lower = int(self.props.get("gpio_level_lower", 19))
 
         GPIO.setup(self.gpio_pump, GPIO.OUT)
         GPIO.output(self.gpio_pump, GPIO.LOW)
